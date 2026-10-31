@@ -43,16 +43,34 @@ esac
 WORKDIR=$(mktemp -d)
 echo "→ Cloning into $WORKDIR"
 
-git \
-  -c transfer.progress=0 \
-  -c advice.detachedHead=false \
-  clone \
-  --quiet \
-  --filter=blob:none \
-  --depth=1 \
-  --branch "v${VERSION}" \
-  https://github.com/tailscale/tailscale \
-  "$WORKDIR/tailscale"
+# 国内网络：直连优先（git 走 github.com 主站端点，通常可达），失败轮换 gh-proxy 镜像，各试 2 次
+CLONE_OK=""
+for ep in \
+  "https://github.com/tailscale/tailscale" \
+  "https://gh-proxy.com/https://github.com/tailscale/tailscale"; do
+  for attempt in 1 2; do
+    echo "  → clone attempt: $ep (try $attempt)"
+    if git \
+      -c transfer.progress=0 \
+      -c advice.detachedHead=false \
+      clone \
+      --quiet \
+      --filter=blob:none \
+      --depth=1 \
+      --branch "v${VERSION}" \
+      "$ep" \
+      "$WORKDIR/tailscale"; then
+      CLONE_OK="$ep"
+      break 2
+    fi
+    rm -rf "$WORKDIR/tailscale"
+    sleep 3
+  done
+done
+if [ -z "$CLONE_OK" ]; then
+  echo "✗ FAILED to clone tailscale from all endpoints" >&2
+  exit 1
+fi
 
 FILE_NAME="tailscale_${VERSION}_${ARCH}${GOARM:+_$GOARM}"
 
