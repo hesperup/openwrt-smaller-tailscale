@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 5
     strategy:
       matrix:
-        arch: [armv7, arm64, amd64, 386, riscv64]
+        arch: [arm64]
 
     steps:
       - name: Checkout code
