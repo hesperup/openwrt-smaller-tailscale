@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, arm64]
     timeout-minutes: 5
     strategy:
       matrix:
@@ -51,20 +51,10 @@ jobs:
 
   release:
     needs: [build]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, arm64]
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
 
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "./artifacts/**/*.tar.gz"
-          tag: v${{ inputs.version }}
-          body: |
-            Automated build for Tailscale `v${{ inputs.version }}`.
-
-            - [Changelog](https://tailscale.com/changelog)
-            - [Source Tag (Github)](https://github.com/tailscale/tailscale/releases/tag/v${{ inputs.version }})
