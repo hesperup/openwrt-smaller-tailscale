@@ -7,8 +7,9 @@ on:
 
 jobs:
   check-version:
-    runs-on: ubuntu-latest
-
+    #runs-on: ubuntu-latest
+    runs-on: [self-hosted, arm64]
+    
     outputs:
       should_build: ${{ steps.compare-versions.outputs.should_build }}
       version: ${{ steps.tailscale-release.outputs.version }}
