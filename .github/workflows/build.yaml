@@ -32,9 +32,11 @@ jobs:
 
       - name: Install UPX
         run: |
-          # self-hosted arm64 runner：用 apt 装 arm64 原生 upx（amd64 版二进制无法在此运行）
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq upx-ucl
+          # self-hosted arm64 runner：upx 官方 arm64_linux 版（bookworm 无 upx-ucl 包），走 gh-proxy 加速
+          curl -fsSL -o /tmp/upx.tar.xz https://gh-proxy.com/https://github.com/upx/upx/releases/download/v5.2.0/upx-5.2.0-arm64_linux.tar.xz
+          tar -C /tmp -xf /tmp/upx.tar.xz
+          sudo install -m755 /tmp/upx-5.2.0-arm64_linux/upx /usr/local/bin/upx
+          rm -rf /tmp/upx.tar.xz /tmp/upx-5.2.0-arm64_linux
           upx --version | head -1
 
       - name: Build for ${{ matrix.arch }}
