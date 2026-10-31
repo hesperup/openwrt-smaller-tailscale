@@ -32,13 +32,10 @@ jobs:
 
       - name: Install UPX
         run: |
-          UPX_VER=5.2.0
-          FILE_NAME=upx-${UPX_VER}-amd64_linux
-          
-          curl -LO https://github.com/upx/upx/releases/download/v${UPX_VER}/${FILE_NAME}.tar.xz
-          tar -xf ${FILE_NAME}.tar.xz
-          sudo install -m755 ${FILE_NAME}/upx /usr/local/bin/upx
-          upx --version
+          # self-hosted arm64 runner：用 apt 装 arm64 原生 upx（amd64 版二进制无法在此运行）
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq upx-ucl
+          upx --version | head -1
 
       - name: Build for ${{ matrix.arch }}
         run: ./build.sh ${{ inputs.version }} ${{ matrix.arch }}
